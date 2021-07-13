@@ -29,13 +29,13 @@ def sort_img(regions):
 def craft_and_ocr(results):
 
     #load model only use cpu
-    refine_net = load_refinenet_model(cuda=False)
-    craft_net = load_craftnet_model(cuda=False)
+    refine_net = load_refinenet_model(cuda=True)
+    craft_net = load_craftnet_model(cuda=True)
     config = Cfg.load_config_from_name('vgg_transformer')
 
     config['weights'] = 'https://drive.google.com/uc?id=1PF33MUrHKTbZmEwH0FuFcSlCuaChFAYy'
     config['cnn']['pretrained']=False
-    config['device'] = 'cpu'
+    config['device'] = 'cuda:0'
     config['predictor']['beamsearch']=False
 
     detector = Predictor(config)
@@ -60,7 +60,7 @@ def craft_and_ocr(results):
                     text_threshold=0.7,
                     link_threshold=0.4,
                     low_text=0.3,
-                    cuda=False,
+                    cuda=True,
                     long_size=1280
                 )
                 regions=prediction_result["polys"]
