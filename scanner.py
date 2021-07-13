@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-import scanner.Utlis as utlis
+import Utlis as utlis
 import os
 
 ########################################################################
