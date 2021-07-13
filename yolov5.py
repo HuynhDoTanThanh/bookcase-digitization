@@ -2,14 +2,17 @@ import cv2
 import torch
 
 def object_detection(images):
-    # Model
+    # load model custom data yolov5l
     model = torch.hub.load('yolov5', 'custom', path='best.pt', source='local')
     model.conf = 0.25
     results = []
+    
+    # cắt từng vùng ảnh tên sách, tên tác giả, nhà xuất bản, tập, người dịch, tái bản
     for img in images:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # Inference
-        pre = model(img, size=640)  # includes NMS
+        pre = model(img, size=640)
+        #lấy danh sách kết quả
         locate = pre.pandas().xyxy[0]
 
         ten_sach = []
@@ -20,7 +23,8 @@ def object_detection(images):
         tai_ban = []
 
         lo = []
-
+        
+        #cắt từng vùng ảnh và thêm vảo mảng đã định danh
         for index, row in locate.iterrows():
             if row['class'] == 0:
                 ten_sach.append(img[int(row['ymin']):int(row['ymax']), int(row['xmin']):int(row['xmax']), :])
@@ -35,7 +39,8 @@ def object_detection(images):
             else:
                 tai_ban.append(img[int(row['ymin']):int(row['ymax']), int(row['xmin']):int(row['xmax']), :])
             lo.append([row['class'], int(row['ymin']), int(row['ymax']), int(row['xmin']), int(row['xmax'])])
-
+        
+        # kiểm tra sự chồng chéo của các nhãn, nếu tác giả nằm trong vùng tên sách có thể loại bỏ tác giả ra khi pre tên sách
         cache = []
         length = len(lo)
         for i in range(length):
@@ -51,7 +56,8 @@ def object_detection(images):
             kq = set(kq)
             kq = list(kq)
             cache.extend(kq)
-
+        
+        #thêm vào dictionary
         features = {
             0: ten_sach,
             1: ten_tac_gia,
