@@ -3,7 +3,7 @@ import torch
 
 def object_detection(images):
     # Model
-    model = torch.hub.load('object_detection\\yolov5', 'custom', path='object_detection\\yolov5\\best.pt', source='local')
+    model = torch.hub.load('yolov5', 'custom', path='best.pt', source='local')
     model.conf = 0.25
     results = []
     for img in images:
