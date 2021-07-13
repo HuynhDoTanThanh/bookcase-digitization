@@ -1,6 +1,6 @@
-from scanner import scanner
-from object_detection import yolov5
-from ocr import crop_line_and_ocr
+import scanner
+import yolov5
+import crop_line_and_ocr
 
 pathImage = 'data'
 
