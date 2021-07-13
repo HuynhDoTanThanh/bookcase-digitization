@@ -271,12 +271,12 @@ def craft_and_ocr(results):
                         ten_sach = ten_sach.replace(s, '')
 
         features = {
-            'ten_sach': ten_sach,
-            'ten_tac_gia': ten_tac_gia,
-            'nha_xuat_ban': nha_xuat_ban,
-            'tap': tap,
-            'nguoi_dich': nguoi_dich,
-            'tai_ban': tai_ban
+            'tên sách': ten_sach,
+            'tên tác giả': ten_tac_gia,
+            'nhà xuất bản': nha_xuat_ban,
+            'tập': tap,
+            'người dịch': nguoi_dich,
+            'tái bản': tai_ban
         }
 
         out.append(features)
