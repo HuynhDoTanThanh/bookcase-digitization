@@ -9,41 +9,38 @@ widthImg = 540
 ########################################################################
 
 def scanner(pathImage):
-    # print(pathImage)
-    # ROOT_DIR = os.path.dirname(os.path.abspath(pathImage))
+    # lấy path file ảnh từ đường dẫn đến folder chứa ảnh
     FJoin = os.path.join
     files = [FJoin(pathImage, f) for f in os.listdir(pathImage)]
 
     images = []
-
+   
     for path in files:
         print(path)
         img = cv2.imread(path)
-        img = cv2.resize(img, None, fx = 0.3, fy = 0.3)  # RESIZE IMAGE
-        imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # CONVERT IMAGE TO GRAY SCALE
-        imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 0)  # ADD GAUSSIAN BLUR
-        imgThreshold = cv2.Canny(imgBlur, 30, 50)  # APPLY CANNY BLUR
+        img = cv2.resize(img, None, fx = 0.3, fy = 0.3)  # RESIZE ảnh
+        imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # CONVERT ảnh thành GRAY SCALE
+        imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 0)  # GAUSSIAN BLUR
+        imgThreshold = cv2.Canny(imgBlur, 30, 50)  # CANNY BLUR
         kernel = np.ones((5, 5))
         imgDial = cv2.dilate(imgThreshold, kernel, iterations = 2)  # APPLY DILATION
         imgThreshold = cv2.erode(imgDial, kernel, iterations = 1)  # APPLY EROSION
 
-        ## FIND ALL COUNTOURS
-        imgBigContour = img.copy()  # COPY IMAGE FOR DISPLAY PURPOSES
+        # tìm tất cả countour
         contours, hierarchy = cv2.findContours(imgThreshold, cv2.RETR_EXTERNAL,
-                                               cv2.CHAIN_APPROX_SIMPLE)  # FIND ALL CONTOURS
+                                               cv2.CHAIN_APPROX_SIMPLE)  
 
-        # FIND THE BIGGEST COUNTOUR
-        biggest, maxArea = utlis.biggestContour(contours)  # FIND THE BIGGEST CONTOUR
+        # lấy countour lớn nhất
+        biggest, maxArea = utlis.biggestContour(contours)
         if biggest.size != 0:
             biggest = utlis.reorder(biggest)
-            cv2.drawContours(imgBigContour, biggest, -1, (0, 255, 0), 20)  # DRAW THE BIGGEST CONTOUR
-            imgBigContour = utlis.drawRectangle(imgBigContour, biggest, 2)
-            pts1 = np.float32(biggest)  # PREPARE POINTS FOR WARP
-            pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])  # PREPARE POINTS FOR WARP
+            pts1 = np.float32(biggest) 
+            pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])
             matrix = cv2.getPerspectiveTransform(pts1, pts2)
-            imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
+            imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))# cắt bìa sách từ BIGEST COUNTOUR tìm được
             images.append(imgWarpColored)
         else:
+            # Nếu không tìm thấy COUNTOUR thì ta vẫn thêm ảnh gốc vào nhưng sẽ in ra màng hình ảnh không contour được để cảnh báo
             print('not scanner image ', path)
             img = cv2.resize(img, (widthImg, heightImg))
             images.append(img)
