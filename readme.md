@@ -2,7 +2,7 @@
 <h1 align="center"><b>ĐỒ ÁN CUỐI KÌ</b></h1>
 <h1 align="center"><b>Đề tài: SỐ HÓA TỦ SÁCH (bookcase digitization)</b></h1>
 
-##**Giới thiệu**
+**Giới thiệu**
 * **Bộ môn:** Máy học - CS112.L21
 * **Giảng viên:**
   * Lê Đình Duy
