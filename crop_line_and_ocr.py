@@ -33,7 +33,7 @@ def craft_and_ocr(results):
     craft_net = load_craftnet_model(cuda=True)
     config = Cfg.load_config_from_name('vgg_transformer')
 
-    config['weights'] = 'https://drive.google.com/uc?id=1PF33MUrHKTbZmEwH0FuFcSlCuaChFAYy'
+    config['weights'] = 'https://drive.google.com/uc?id=1uvPvRYjcr43JErWXizLY2EglbHh55Pdz'
     config['cnn']['pretrained']=False
     config['device'] = 'cuda:0'
     config['predictor']['beamsearch']=False
