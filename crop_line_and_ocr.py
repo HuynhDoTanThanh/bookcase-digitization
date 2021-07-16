@@ -26,7 +26,7 @@ def sort_img(regions):
     regions[min], regions[i] = regions[i], regions[min]
   return regions
 
-def ocr(i):
+def ocr(i, detector):
   if i.shape[0] < i.shape[1]:
     i = Image.fromarray(i)
     s, p = detector.predict(i, return_prob = True)
@@ -59,7 +59,7 @@ def ocr(i):
     else:
         return (0, 0)
     
-def read(img, key, craft_net, refine_net):
+def read(img, key, craft_net, refine_net, detector):
   image = read_image(img)
                     
   #predict craft
@@ -105,13 +105,11 @@ def read(img, key, craft_net, refine_net):
   #chuyển thành ảnh lưu vào mảng a
   for i in regions:
     a.append(rectify_poly(image, i))
-  if len(a) == 1:
-    a = [img]
-  
+
   p = 0
   s = ''
   for i in a:
-    s_temp, p_temp = ocr(i)
+    s_temp, p_temp = ocr(i, detector)
     if s_temp != 0:
       p += p_temp
       s += s_temp + " "
@@ -128,7 +126,7 @@ def craft_and_ocr(results):
     config['weights'] = 'https://drive.google.com/uc?id=1uvPvRYjcr43JErWXizLY2EglbHh55Pdz'
     config['cnn']['pretrained']=False
     config['device'] = 'cuda:0'
-    config['predictor']['beamsearch']=False
+    config['predictor']['beamsearch']=True
 
     detector = Predictor(config)
 
@@ -145,7 +143,7 @@ def craft_and_ocr(results):
         for key, value in info.items():
             for img in value:
                 if img.shape[0] < img.shape[1] * 2:
-                    s, _ = read(img, key, craft_net, refine_net)
+                    s, _ = read(img, key, craft_net, refine_net, detector)
                     if key == 0:
                         ten_sach += s + " "
                     elif key == 1:
@@ -160,20 +158,20 @@ def craft_and_ocr(results):
                         tai_ban += s + " "
                 else:
                     im1 = img
-                    s1, p1 = read(img, key, craft_net, refine_net)
+                    s1, p1 = read(img, key, craft_net, refine_net, detector)
                     
                     s = s1
                     p = p1
                     
                     im2 = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
-                    s2, p2 = read(im2, key, craft_net, refine_net)
+                    s2, p2 = read(im2, key, craft_net, refine_net, detector)
 
                     if p2 > p:
                       p = p2
                       s = s2
                     
                     im3 = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                    s3, p3 = read(im3, key, craft_net, refine_net)
+                    s3, p3 = read(im3, key, craft_net, refine_net, detector)
 
                     if p3 > p:
                       p = p3
