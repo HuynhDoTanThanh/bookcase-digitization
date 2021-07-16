@@ -3,7 +3,7 @@ import torch
 
 def object_detection(images):
     # load model custom data yolov5l
-    model = torch.hub.load('yolov5', 'custom', path='best.pt', source='local')
+    model = torch.hub.load('yolov5', 'custom', path='last.pt', source='local')
     model.conf = 0.5
     results = []
     
