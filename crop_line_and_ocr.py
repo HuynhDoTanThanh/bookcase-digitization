@@ -59,7 +59,7 @@ def ocr(i):
     else:
         return (0, 0)
     
- def read(img, key):
+def read(img, key):
   image = read_image(img)
                     
   #predict craft
