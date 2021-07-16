@@ -26,6 +26,98 @@ def sort_img(regions):
     regions[min], regions[i] = regions[i], regions[min]
   return regions
 
+def ocr(i):
+  if i.shape[0] < i.shape[1]:
+    i = Image.fromarray(i)
+    s, p = detector.predict(i, return_prob = True)
+    if p > 0.7:
+        return (s, p)
+    else:
+        return (0, 0)
+  #nếu ảnh dọc thì ta xoay ảnh đông thời dùng prob để ocr được kết quả tốt nhất
+  else:
+    im1 = Image.fromarray(i)
+    s1, p1 = detector.predict(im1, return_prob = True)
+    s = s1
+    p = p1
+
+    im2 = cv2.rotate(i, cv2.ROTATE_90_CLOCKWISE)
+    im2 = Image.fromarray(im2)
+    s2, p2 = detector.predict(im2, return_prob = True)
+    if p2 > p:
+        p = p2
+        s = s2
+
+    im3 = cv2.rotate(i, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    im3 = Image.fromarray(im3)
+    s3, p3 = detector.predict(im3, return_prob = True)
+    if p3 > p:
+        p = p3
+        s = s3
+    if p > 0.7:
+        return (s, p)
+    else:
+        return (0, 0)
+    
+ def read(img, key):
+  image = read_image(img)
+                    
+  #predict craft
+  if key == 0:
+      prediction_result = get_prediction(
+          image=image,
+          craft_net=craft_net,
+          refine_net=refine_net,
+          text_threshold=0.7,
+          link_threshold=0.3,
+          low_text=0.3,
+          cuda=True,
+          long_size=1280
+      )
+  elif key == 3:
+      prediction_result = get_prediction(
+            image=image,
+            craft_net=craft_net,
+            refine_net=refine_net,
+            text_threshold=0.7,
+            link_threshold=0.1,
+            low_text=0.05,
+            cuda=True,
+            long_size=1280
+        )
+  else:
+      prediction_result = get_prediction(
+          image=image,
+          craft_net=craft_net,
+          refine_net=refine_net,
+          text_threshold=0.7,
+          link_threshold=0.1,
+          low_text=0.2,
+          cuda=True,
+          long_size=1280
+      )
+  regions=prediction_result["polys"]
+  
+  #sắp xếp lại ảnh sau khi craft
+  sort_img(regions)
+
+  a = []
+  #chuyển thành ảnh lưu vào mảng a
+  for i in regions:
+    a.append(rectify_poly(image, i))
+  if len(a) == 1:
+    a = [img]
+  
+  p = 0
+  s = ''
+  for i in a:
+    s_temp, p_temp = ocr(i)
+    if s_temp != 0:
+      p += p_temp
+      s += s_temp + " "
+    p = p/len(a)
+  return s, p
+
 def craft_and_ocr(results):
 
     #load model
@@ -52,204 +144,53 @@ def craft_and_ocr(results):
         tai_ban = ""
         for key, value in info.items():
             for img in value:
-                #read image
-                image = read_image(img)
-                
-                #predict craft
-                prediction_result = get_prediction(
-                    image=image,
-                    craft_net=craft_net,
-                    refine_net=refine_net,
-                    text_threshold=0.7,
-                    link_threshold=0.4,
-                    low_text=0.3,
-                    cuda=True,
-                    long_size=1280
-                )
-                regions=prediction_result["polys"]
-                
-                #sắp xếp lại ảnh sau khi craft
-                sort_img(regions)
-
-                a = []
-                #chuyển thành ảnh lưu vào mảng a
-                for i in regions:
-                  a.append(rectify_poly(image, i))
-                
-                #thêm text vảo chuỗi tên sách
-                if key == 0:
-                    for i in a:
-                        #nếu ảnh ngang thì ta ocr luôn
-                        if i.shape[0] < i.shape[1]:
-                            i = Image.fromarray(i)
-                            s, p = detector.predict(i, return_prob = True)
-                            if p > 0.7:
-                                ten_sach += ' ' + s
-                        #nếu ảnh dọc thì ta xoay ảnh đông thời dùng prob để ocr được kết quả tốt nhất
-                        else:
-                            im1 = Image.fromarray(i)
-                            s1, p1 = detector.predict(im1, return_prob = True)
-                            s = s1
-                            p = p1
-
-                            im2 = cv2.rotate(i, cv2.ROTATE_90_CLOCKWISE)
-                            im2 = Image.fromarray(im2)
-                            s2, p2 = detector.predict(im2, return_prob = True)
-                            if p2 > p:
-                                p = p2
-                                s = s2
-
-                            im3 = cv2.rotate(i, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                            im3 = Image.fromarray(im3)
-                            s3, p3 = detector.predict(im3, return_prob = True)
-                            if p3 > p:
-                                p = p3
-                                s = s3
-                            if p > 0.6:
-                                ten_sach += ' ' + s
-                                
-                #tương tự những cái còn lại thêm text vảo chuỗi tên tác giả, nhà xuất bản, tập, người dịch, tái bản
-                elif key == 1:
-                    for i in a:
-                        if i.shape[0] < i.shape[1]:
-                            i = Image.fromarray(i)
-                            s, p = detector.predict(i, return_prob = True)
-                            if p > 0.6:
-                                ten_tac_gia += ' ' + s
-                        else:
-                            im1 = Image.fromarray(i)
-                            s1, p1 = detector.predict(im1, return_prob = True)
-                            s = s1
-                            p = p1
-
-                            im2 = cv2.rotate(i, cv2.ROTATE_90_CLOCKWISE)
-                            im2 = Image.fromarray(im2)
-                            s2, p2 = detector.predict(im2, return_prob = True)
-                            if p2 > p:
-                                p = p2
-                                s = s2
-
-                            im3 = cv2.rotate(i, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                            im3 = Image.fromarray(im3)
-                            s3, p3 = detector.predict(im3, return_prob = True)
-                            if p3 > p:
-                                p = p3
-                                s = s3
-                            if p > 0.6:
-                                ten_tac_gia += ' ' + s
-                elif key == 2:
-                    for i in a:
-                        if i.shape[0] < i.shape[1]:
-                            i = Image.fromarray(i)
-                            s, p = detector.predict(i, return_prob = True)
-                            if p > 0.6:
-                                nha_xuat_ban += ' ' + s
-                        else:
-                            im1 = Image.fromarray(i)
-                            s1, p1 = detector.predict(im1, return_prob = True)
-                            s = s1
-                            p = p1
-
-                            im2 = cv2.rotate(i, cv2.ROTATE_90_CLOCKWISE)
-                            im2 = Image.fromarray(im2)
-                            s2, p2 = detector.predict(im2, return_prob = True)
-                            if p2 > p:
-                                p = p2
-                                s = s2
-
-                            im3 = cv2.rotate(i, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                            im3 = Image.fromarray(im3)
-                            s3, p3 = detector.predict(im3, return_prob = True)
-                            if p3 > p:
-                                p = p3
-                                s = s3
-                            if p > 0.6:
-                                nha_xuat_ban += ' ' + s
-                elif key == 3:
-                    for i in a:
-                        if i.shape[0] < i.shape[1]:
-                            i = Image.fromarray(i)
-                            s, p = detector.predict(i, return_prob = True)
-                            if p > 0.6:
-                                tap += ' ' + s
-                        else:
-                            im1 = Image.fromarray(i)
-                            s1, p1 = detector.predict(im1, return_prob = True)
-                            s = s1
-                            p = p1
-
-                            im2 = cv2.rotate(i, cv2.ROTATE_90_CLOCKWISE)
-                            im2 = Image.fromarray(im2)
-                            s2, p2 = detector.predict(im2, return_prob = True)
-                            if p2 > p:
-                                p = p2
-                                s = s2
-
-                            im3 = cv2.rotate(i, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                            im3 = Image.fromarray(im3)
-                            s3, p3 = detector.predict(im3, return_prob = True)
-                            if p3 > p:
-                                p = p3
-                                s = s3
-                            if p > 0.6:
-                                tap += ' ' + s
-                elif key == 4:
-                    for i in a:
-                        if i.shape[0] < i.shape[1]:
-                            i = Image.fromarray(i)
-                            s, p = detector.predict(i, return_prob = True)
-                            if p > 0.6:
-                                nguoi_dich += ' ' + s
-                        else:
-                            im1 = Image.fromarray(i)
-                            s1, p1 = detector.predict(im1, return_prob = True)
-                            s = s1
-                            p = p1
-
-                            im2 = cv2.rotate(i, cv2.ROTATE_90_CLOCKWISE)
-                            im2 = Image.fromarray(im2)
-                            s2, p2 = detector.predict(im2, return_prob = True)
-                            if p2 > p:
-                                p = p2
-                                s = s2
-
-                            im3 = cv2.rotate(i, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                            im3 = Image.fromarray(im3)
-                            s3, p3 = detector.predict(im3, return_prob = True)
-                            if p3 > p:
-                                p = p3
-                                s = s3
-                            if p > 0.6:
-                                nguoi_dich += ' ' + s
+                if img.shape[0] < img.shape[1] * 2:
+                    s, _ = read(img, key)
+                    if key == 0:
+                        ten_sach += s + " "
+                    elif key == 1:
+                        ten_tac_gia += s + " "
+                    elif key == 2:
+                        nha_xuat_ban += s + " "
+                    elif key == 3:
+                        tap += s + " "
+                    elif key == 4:
+                        nguoi_dich += s + " "
+                    else:
+                        tai_ban += s + " "
                 else:
-                    for i in a:
-                        if i.shape[0] < i.shape[1]:
-                            i = Image.fromarray(i)
-                            s, p = detector.predict(i, return_prob = True)
-                            if p > 0.6:
-                                tai_ban += ' ' + s
-                        else:
-                            im1 = Image.fromarray(i)
-                            s1, p1 = detector.predict(im1, return_prob = True)
-                            s = s1
-                            p = p1
+                    im1 = img
+                    s1, p1 = read(img, key)
+                    
+                    s = s1
+                    p = p1
+                    
+                    im2 = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+                    s2, p2 = read(im2, key)
 
-                            im2 = cv2.rotate(i, cv2.ROTATE_90_CLOCKWISE)
-                            im2 = Image.fromarray(im2)
-                            s2, p2 = detector.predict(im2, return_prob = True)
-                            if p2 > p:
-                                p = p2
-                                s = s2
+                    if p2 > p:
+                      p = p2
+                      s = s2
+                    
+                    im3 = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                    s3, p3 = read(im3, key)
 
-                            im3 = cv2.rotate(i, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                            im3 = Image.fromarray(im3)
-                            s3, p3 = detector.predict(im3, return_prob = True)
-                            if p3 > p:
-                                p = p3
-                                s = s3
-                            if p > 0.6:
-                                tai_ban += ' ' + s
-         
+                    if p3 > p:
+                      p = p3
+                      s = s3
+                    
+                    if key == 0:
+                        ten_sach += s + " "
+                    elif key == 1:
+                        ten_tac_gia += s + " "
+                    elif key == 2:
+                        nha_xuat_ban += s + " "
+                    elif key == 3:
+                        tap += s + " "
+                    elif key == 4:
+                        nguoi_dich += s + " "
+                    else:
+                        tai_ban += s + " "
         #nếu mà tên tác giả, nhà xuất bản, tập, người dịch, tái bản có lẫn vào tên sách thì lấy nó ra
         for i in cache:
             if i == 1:
