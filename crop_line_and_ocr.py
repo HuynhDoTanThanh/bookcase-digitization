@@ -59,7 +59,7 @@ def ocr(i):
     else:
         return (0, 0)
     
-def read(img, key):
+def read(img, key, craft_net, refine_net):
   image = read_image(img)
                     
   #predict craft
@@ -145,7 +145,7 @@ def craft_and_ocr(results):
         for key, value in info.items():
             for img in value:
                 if img.shape[0] < img.shape[1] * 2:
-                    s, _ = read(img, key)
+                    s, _ = read(img, key, craft_net, refine_net)
                     if key == 0:
                         ten_sach += s + " "
                     elif key == 1:
@@ -160,20 +160,20 @@ def craft_and_ocr(results):
                         tai_ban += s + " "
                 else:
                     im1 = img
-                    s1, p1 = read(img, key)
+                    s1, p1 = read(img, key, craft_net, refine_net)
                     
                     s = s1
                     p = p1
                     
                     im2 = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
-                    s2, p2 = read(im2, key)
+                    s2, p2 = read(im2, key, craft_net, refine_net)
 
                     if p2 > p:
                       p = p2
                       s = s2
                     
                     im3 = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
-                    s3, p3 = read(im3, key)
+                    s3, p3 = read(im3, key, craft_net, refine_net)
 
                     if p3 > p:
                       p = p3
