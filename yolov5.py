@@ -11,7 +11,7 @@ def object_detection(images):
     for img in images:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         # Inference
-        pre = model(img, size=640)
+        pre = model(img, size=720)
         #lấy danh sách kết quả
         locate = pre.pandas().xyxy[0]
 
