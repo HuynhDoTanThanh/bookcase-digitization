@@ -116,7 +116,7 @@ def read(img, key, craft_net, refine_net, detector):
     p = p/len(a)
   return s, p
 
-def craft_and_ocr(results):
+def craft_and_ocr(results, fn):
 
     #load model
     refine_net = load_refinenet_model(cuda=True)
@@ -133,7 +133,7 @@ def craft_and_ocr(results):
     out = []
     
     #predict ocr
-    for info, cache in results:
+    for info, cache, p in results, fn:
         ten_sach = ""
         ten_tac_gia = ""
         nha_xuat_ban = ""
@@ -224,6 +224,7 @@ def craft_and_ocr(results):
         
         #thêm vào dictionary
         features = {
+            'file names' : p,
             'tên sách': ten_sach,
             'tên tác giả': ten_tac_gia,
             'nhà xuất bản': nha_xuat_ban,
