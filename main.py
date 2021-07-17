@@ -30,4 +30,4 @@ if __name__ == "__main__":
   # ocr thông tin trong ảnh
   dataframe = crop_line_and_ocr.craft_and_ocr(obj, fn)
   # save to csv
-  dataframe.to_csv('data.csv', index = True, header=True, encoding = 'utf-8')
+  dataframe.to_csv('data.csv', header=True)
