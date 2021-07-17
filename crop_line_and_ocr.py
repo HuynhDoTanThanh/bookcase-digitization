@@ -238,6 +238,6 @@ def craft_and_ocr(results, fn):
         out.append(features)
     #tạo dataframe và lưu vào
     output = pd.DataFrame()
-    output = output.append(out, ignore_index=True, sort=False)
+    output = output.append(out, sort=True)
 
     return output
