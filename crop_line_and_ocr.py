@@ -133,7 +133,7 @@ def craft_and_ocr(results, fn):
     out = []
     
     #predict ocr
-    for info, cache, p in results, fn:
+    for info, cache, file_name in results, fn:
         ten_sach = ""
         ten_tac_gia = ""
         nha_xuat_ban = ""
@@ -224,7 +224,7 @@ def craft_and_ocr(results, fn):
         
         #thêm vào dictionary
         features = {
-            'file names' : p,
+            'file names' : file_name,
             'tên sách': ten_sach,
             'tên tác giả': ten_tac_gia,
             'nhà xuất bản': nha_xuat_ban,
