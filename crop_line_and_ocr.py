@@ -131,9 +131,9 @@ def craft_and_ocr(results, fn):
     detector = Predictor(config)
 
     out = []
-    
+    idx = 0
     #predict ocr
-    for info, cache, file_name in results, fn:
+    for info, cache, file_name in results:
         ten_sach = ""
         ten_tac_gia = ""
         nha_xuat_ban = ""
@@ -224,7 +224,7 @@ def craft_and_ocr(results, fn):
         
         #thêm vào dictionary
         features = {
-            'file names' : file_name,
+            'file names' : fn[idx],
             'tên sách': ten_sach,
             'tên tác giả': ten_tac_gia,
             'nhà xuất bản': nha_xuat_ban,
@@ -232,6 +232,8 @@ def craft_and_ocr(results, fn):
             'người dịch': nguoi_dich,
             'tái bản': tai_ban
         }
+        
+        idx += 1
         
         out.append(features)
     #tạo dataframe và lưu vào
