@@ -133,7 +133,7 @@ def craft_and_ocr(results, fn):
     out = []
     idx = 0
     #predict ocr
-    for info, cache, file_name in results:
+    for info, cache in results:
         ten_sach = ""
         ten_tac_gia = ""
         nha_xuat_ban = ""
