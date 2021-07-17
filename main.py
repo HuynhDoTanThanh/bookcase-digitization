@@ -24,10 +24,10 @@ if __name__ == "__main__":
   main(sys.argv[1:])
   
   # scanner ảnh từ ảnh có nền đen thành ảnh bìa sách không còn nền đen
-  images = scanner.scanner(pathImage)
+  images, path = scanner.scanner(pathImage)
   # lấy object và cache
   obj = yolov5.object_detection(images)
   # ocr thông tin trong ảnh
-  dataframe = crop_line_and_ocr.craft_and_ocr(obj)
+  dataframe = crop_line_and_ocr.craft_and_ocr(obj, path)
   # save to csv
   dataframe.to_csv('data.csv', index = True, header=True, encoding = 'utf-8')
