@@ -14,9 +14,9 @@ def scanner(pathImage):
     files = [FJoin(pathImage, f) for f in os.listdir(pathImage)]
 
     images = []
+    
    
     for path in files:
-        print(path)
         img = cv2.imread(path)
         img = cv2.resize(img, None, fx = 0.3, fy = 0.3)  # RESIZE ảnh
         imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # CONVERT ảnh thành GRAY SCALE
@@ -45,4 +45,4 @@ def scanner(pathImage):
             img = cv2.resize(img, (widthImg, heightImg))
             images.append(img)
 
-    return images
+    return (images, os.listdir(pathImage)) 
