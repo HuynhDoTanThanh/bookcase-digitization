@@ -1,1 +1,1 @@
-BỘ DATA GỒM 100 ẢNH CÁC LOẠI
+BỘ DATA GỒM 90 ẢNH CÁC LOẠI
