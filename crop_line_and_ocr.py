@@ -239,5 +239,5 @@ def craft_and_ocr(results, fn):
     #tạo dataframe và lưu vào
     output = pd.DataFrame()
     output = output.append(out, sort=False)
-
+    output.sort_values(by=['file names'])
     return output
