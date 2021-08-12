@@ -1,1 +1,0 @@
-BỘ DATA GỒM 90 ẢNH CÁC LOẠI
